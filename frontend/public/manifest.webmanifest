@@ -1,0 +1,11 @@
+{
+  "name": "Shadow Learn",
+  "short_name": "Shadow",
+  "description": "Private English shadowing studio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#11100e",
+  "theme_color": "#11100e",
+  "icons": []
+}
+

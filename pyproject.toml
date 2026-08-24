@@ -1,0 +1,41 @@
+[project]
+name = "shadow-learn"
+version = "0.1.0"
+description = "Private, persistent English shadowing studio"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+  "fastapi==0.116.1",
+  "uvicorn[standard]==0.35.0",
+  "python-multipart==0.0.20",
+  "pydantic-settings==2.10.1",
+  "httpx==0.28.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.4.1",
+  "pytest-asyncio==1.1.0",
+  "ruff==0.12.7",
+]
+
+[project.scripts]
+shadow-learn = "shadowlearn.main:run"
+shadow-benchmark = "shadowlearn.benchmark:run"
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.setuptools]
+package-dir = {"" = "backend"}
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+

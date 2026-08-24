@@ -1,0 +1,13 @@
+[
+  {"id":"punctuation","accent":"us","text":"Good morning, everyone. Today, we will focus on clarity, confidence, and control; each quality matters."},
+  {"id":"questions","accent":"us","text":"Did you finish the report? If not, when do you think it will be ready?"},
+  {"id":"dialogue","accent":"uk","text":"\"I thought the meeting began at half past nine,\" Maya said. \"It does,\" replied Daniel, \"but the doors open earlier.\""},
+  {"id":"numbers","accent":"us","text":"On August 24, 2026, the invoice total was $1,247.50, including a 7.5 percent service charge."},
+  {"id":"abbreviations","accent":"uk","text":"Dr. Patel joined the U.K. research team at 8:30 a.m. and presented the latest A.I. results."},
+  {"id":"difficult_words","accent":"us","text":"She articulated rural, entrepreneurial, particularly, sixths, and regularly with deliberate precision."},
+  {"id":"emotion","accent":"us","text":"At last—we made it! After months of uncertainty, the answer was suddenly, wonderfully clear."},
+  {"id":"formal","accent":"uk","text":"Nevertheless, the committee concluded that the proposal was both financially prudent and ethically responsible."},
+  {"id":"contrast","accent":"us","text":"I didn't say he stole the money. I said the evidence deserved a closer look."},
+  {"id":"paragraph","accent":"uk","text":"The rain slowed to a whisper. Beyond the station, morning light touched the rooftops.\n\nFor the first time that week, the city seemed completely still."}
+]
+
