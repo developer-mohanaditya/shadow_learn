@@ -212,6 +212,8 @@ In **Voice Library**, click the play button to hear a preset voice. The first pr
 
 ## Benchmarking engines
 
+For structured release testing, use the [V1 acceptance checklist](docs/V1_ACCEPTANCE_CHECKLIST.md), [four-engine test guide](docs/ENGINE_TEST_GUIDE.md), and the prepared scripts under [`test-scripts/`](test-scripts/).
+
 Run every engine against the fixed English corpus:
 
 ```sh

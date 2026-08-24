@@ -1,0 +1,12 @@
+Hello, and thank you for giving me the opportunity to introduce myself. [pause:short] My name is [emphasis]Mohan Aditya Sadhanala[/emphasis], and I am a builder working at the intersection of artificial intelligence, professional networks, and human-centred innovation.
+
+My academic foundation is in Electronics and Communication Engineering at Rajiv Gandhi University of Knowledge Technologies, Nuzvid. That experience taught me to connect hardware, software, research, and real-world problem solving. But what has shaped me most is the habit of turning an idea into something people can actually use. [pause:medium]
+
+One example is Project Green Globe, an intelligent watering system designed to reduce both overwatering and underwatering. The project reached the top fifty in Samsung Solve for Tomorrow and received an Award of Excellence in the Innovate FPGA Design Contest. I have also worked on Internet-of-Things research, including a movable surveillance camera using Raspberry Pi, which was published through the Institute of Electrical and Electronics Engineers.
+
+Beyond technology, I enjoy bringing people together. As president of a university-level Internet-of-Things Grand Expo, I helped lead an event featuring more than two hundred projects while coordinating operations, hospitality, media, and marketing teams. That experience taught me that innovation needs more than a strong idea; it needs communication, trust, and disciplined execution. [pause:medium]
+
+Today, I am creating Profeshare AI, a verified professional ecosystem that connects education, industry, and research. The goal is to help real people present credible evidence of their abilities, discover relevant opportunities, and build trusted collaborations through natural-language interaction. [pause:short]
+
+I would describe myself as curious, ambitious, and deeply practical. I enjoy learning across disciplines, asking difficult questions, and building systems that create measurable value. [emphasis]My long-term goal is simple: use technology to make opportunity more trustworthy, accessible, and meaningful.[/emphasis] [pause:long] Thank you.
+

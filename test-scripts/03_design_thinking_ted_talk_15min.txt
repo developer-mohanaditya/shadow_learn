@@ -1,0 +1,84 @@
+Let me begin with a simple object: a door. [pause:short] You walk toward it, reach for the handle, pull—and nothing happens. Then you notice a small sign that says, “Push.” [pause:medium] Who made the mistake? Was it you, or was it the door?
+
+For years, we have been trained to blame ourselves when products, services, and systems confuse us. But a designer asks a different question: [emphasis]What was it about the experience that made the wrong action feel right?[/emphasis] [pause:long]
+
+That question sits at the heart of design thinking.
+
+Design thinking is a human-centred approach to solving problems under uncertainty. It combines three essential perspectives. First, desirability: are we solving something that genuinely matters to people? Second, feasibility: can we create it with the technology, skills, and resources available? Third, viability: can the solution survive and deliver value in the real world? Innovation becomes meaningful when these perspectives meet. A technically impressive product that nobody needs is not successful. A delightful idea that cannot be delivered is not successful. And a profitable system that harms the people inside it is not responsible design. [pause:medium]
+
+The phrase “design thinking” can sound as if it belongs only to designers. It does not. It is useful to entrepreneurs, engineers, teachers, doctors, public servants, researchers, managers, and anyone facing a complex human problem. Its power is not a magical brainstorming technique. Its power is a disciplined shift in attention: from our assumptions to other people's experiences; from defending an answer to learning what the problem really is; and from debating an idea to making something that can be tested. [pause:long]
+
+Design thinking is often taught through five modes: empathise, define, ideate, prototype, and test. These modes give us a shared language, but they are not a rigid staircase. Real projects move backwards, forwards, and sideways. A prototype can reveal that the problem was framed badly. A user interview can invalidate the team's favourite idea. A test can send us back to observation. [emphasis]The process is structured, but the learning is not linear.[/emphasis]
+
+Let us walk through those modes using a familiar challenge. Imagine that a hospital wants to reduce the number of patients who miss follow-up appointments. The first reaction might be, “We need a better reminder app.” Notice what happened: the team jumped from a problem to a solution in one sentence. Design thinking asks us to slow down before we speed up. [pause:medium]
+
+The first mode is [emphasis]empathise[/emphasis]. Empathy is not simply being kind, and it is not imagining what we would do in somebody else's position. It is the practice of learning how another person experiences a situation in their real context.
+
+In our hospital example, the team might interview patients, observe the discharge process, speak with nurses and reception staff, and map what happens between leaving the hospital and returning for care. They might meet a patient who works an unpredictable shift, a parent who cannot arrange childcare, an older adult who cannot read a small message on a phone, or someone who is afraid that the next appointment will bring bad news. [pause:medium]
+
+If we only ask, “Would you like a reminder?” most people will say yes. But if we observe behaviour and ask about a recent missed appointment, we may discover transport problems, confusing instructions, financial anxiety, language barriers, or a lack of trust. The missed appointment is the visible event. The human need is underneath it.
+
+Good empathy requires curiosity without judgement. Ask open questions. Invite stories. Pay attention to workarounds, contradictions, emotion, and silence. Watch what people do, not only what they say. Include people at the edges of the experience, because extreme situations often reveal needs that the average case hides. [pause:short] And remember: one vivid interview is not universal truth. Empathy generates insight; it does not replace evidence.
+
+The second mode is [emphasis]define[/emphasis]. Here, the team turns a large collection of observations into a focused point of view. This is synthesis: grouping patterns, identifying tensions, and deciding which human need deserves attention.
+
+A weak problem statement might say, “Patients need an appointment app.” That statement already contains a solution. A stronger statement might say, “Patients leaving urgent care need a clear and reassuring way to coordinate follow-up around work and family constraints, because uncertainty makes the next step easy to postpone.” [pause:medium] Now the team has a user, a need, a context, and an insight.
+
+Teams often convert that point of view into a “How might we” question. How might we make follow-up feel manageable before the patient leaves the hospital? How might we help patients coordinate transport and timing without embarrassment? How might we reduce uncertainty about what will happen at the next visit? [pause:short] A useful question is neither so narrow that only one answer fits, nor so broad that every idea becomes relevant.
+
+Defining is an act of choice. When we define the problem, we decide what we will pay attention to and what we will temporarily leave outside the frame. That gives design enormous power—and responsibility. If the wrong people are absent from the room, the frame may exclude their needs. If the team measures only operational efficiency, it may optimise a system that feels inhuman. [emphasis]How we frame a problem shapes the future we are able to imagine.[/emphasis] [pause:long]
+
+The third mode is [emphasis]ideate[/emphasis]. Once the challenge is framed, the team deliberately creates many possible responses. This is divergent thinking: going wide before deciding where to go deep.
+
+In ordinary meetings, the first plausible idea often becomes the centre of gravity. Senior voices speak first. Practical objections arrive immediately. The group improves one familiar idea instead of exploring the space. Ideation changes the rules for a short period. Defer judgement. Build on other people's ideas. Seek quantity. Invite unusual combinations. Use sketches and short headlines so ideas remain easy to share.
+
+For the hospital challenge, ideas might include scheduling the follow-up before discharge, offering evening clinics, pairing appointments with transport support, giving patients a choice of communication channel, using a human navigator for high-risk cases, creating a family coordination link, or redesigning the explanation of why follow-up matters. Some ideas will be unrealistic. That is acceptable. An impractical idea can contain a useful principle.
+
+But brainstorming is not the finish line. Divergence must be followed by convergence. The team reviews ideas against human desirability, technical feasibility, business or operational viability, ethical risk, and what it most needs to learn. It may combine several concepts or select different ideas for different patient groups. The goal is not to choose the most exciting presentation. It is to choose the most valuable uncertainty to test. [pause:medium]
+
+That brings us to the fourth mode: [emphasis]prototype[/emphasis]. A prototype is a question made tangible. It can be a paper screen, a role-play, a storyboard, a sample message, a cardboard model, a fake service desk, or a manual process behind a simple interface. It does not need to look finished. In fact, making it look too polished can be dangerous, because people become polite, teams become protective, and feedback focuses on colours rather than assumptions.
+
+Suppose the team believes that scheduling before discharge will reduce missed visits. It does not need to build a complete hospital platform. A staff member can use a printed calendar and role-play the conversation with five patients. The team can learn whether patients understand the choices, whether the conversation takes too long, whether work schedules can be accommodated, and whether a written summary reduces confusion.
+
+Prototypes should be only as detailed as the question requires. If you want to learn whether people understand a concept, use a sketch. If you want to learn whether they can complete a task, create a clickable flow. If you want to learn how a service feels across time, use a storyboard or role-play. If you want to learn whether an organisation can deliver it, simulate the backstage operations. [pause:medium]
+
+The most useful question is not, “Do you like our prototype?” People often say yes to be encouraging. Ask them to show you what they think it does. Give them a realistic task. Observe where they hesitate. Ask what they expected to happen. A prototype is successful when it produces learning, even when the idea itself fails. [emphasis]Cheap failure now prevents expensive failure later.[/emphasis] [pause:long]
+
+The fifth mode is [emphasis]test[/emphasis]. Testing places the prototype in front of real people and treats their response as evidence. The team watches, listens, measures, and decides what to change.
+
+Testing is not a courtroom where designers prove that they were right. It is a laboratory where assumptions are allowed to be wrong. If three patients misunderstand the same instruction, do not explain the interface better during the session. Record the confusion. That moment is the finding. If staff members create a workaround, study it. The workaround may be pointing toward a better design.
+
+Separate observations from interpretations. “The participant paused for twelve seconds before choosing a date” is an observation. “The participant is not comfortable with technology” is an interpretation—and perhaps an unfair one. Maybe the available dates conflict with work. Maybe the text is unclear. Maybe the participant is calculating travel time. Return to questions before settling on conclusions. [pause:medium]
+
+After testing, the team may refine the prototype, choose another idea, redefine the need, or return to empathy research. This is why the five modes are not a conveyor belt. Each cycle reduces uncertainty and increases the quality of the team's understanding.
+
+There is another rhythm underneath the process: creating choices and making choices. We diverge when we gather many observations or generate many ideas. We converge when we identify patterns, frame a question, select a prototype, or decide what to test next. Strong teams move between these modes deliberately. If they converge too early, they repeat familiar answers. If they diverge forever, they produce inspiration without action. [pause:long]
+
+Now, let us address three common misunderstandings.
+
+The first is that design thinking means asking users what product they want. People are experts in their experiences, but they are not responsible for inventing the final solution. We listen to understand needs, behaviours, constraints, and values. The design team then combines that understanding with technical and operational knowledge.
+
+The second misunderstanding is that empathy makes data unnecessary. It does not. Qualitative research can reveal why something may be happening and what questions deserve investigation. Quantitative evidence can show scale, frequency, and patterns across a population. The strongest decisions often combine both.
+
+The third misunderstanding is that design thinking always produces innovation. A workshop filled with sticky notes does not guarantee a useful outcome. The method fails when research is superficial, when leaders have already chosen the answer, when teams prototype only what is easy to build, or when testing is performed with people who cannot challenge the assumptions. [pause:medium]
+
+Design thinking also carries ethical responsibilities. Who benefits from the solution? Who bears the risk? Whose data is collected? Who might be excluded by language, disability, cost, connectivity, or culture? A solution can be desirable for one stakeholder and harmful to another. Responsible teams expand the definition of the user, examine unintended consequences, and create ways for affected people to influence decisions.
+
+Artificial intelligence makes this responsibility even more urgent. Imagine designing an AI recruitment system. Empathy might reveal that candidates want timely feedback and recruiters want manageable shortlists. But the team must also ask whether historical data contains bias, whether recommendations can be explained, whether candidates can correct inaccurate information, and whether automation removes meaningful human judgement. Feasibility asks, “Can we build it?” Responsible design adds, [emphasis]“Should we build it this way?”[/emphasis] [pause:long]
+
+So how can you begin tomorrow?
+
+Start with a real situation, not a fashionable solution. Choose one group of people you can speak with. Conduct three short interviews about recent behaviour. Ask for stories: “Tell me about the last time this happened.” Write observations on separate notes. Group them into patterns. Create one point of view and three “How might we” questions. Generate at least twenty ideas before selecting anything. Build the smallest prototype that can answer one important question. Test it with real people. Then write down what changed in your understanding.
+
+Notice the emphasis: not what changed in the prototype, but what changed in your understanding. Because the deepest product of design thinking is not the sketch, the workshop, or the feature. It is a team that has learned how to learn from people and from reality. [pause:medium]
+
+Let us return to the door. A sign that says “Push” can correct our action, but it does not correct the design. A better door communicates through its shape, position, and movement. It makes the right action feel natural.
+
+Our organisations, services, technologies, and public systems are also doors. They invite people forward, or they make people feel foolish for not understanding. They distribute opportunity, or quietly block it. They earn trust, or consume it. [pause:medium]
+
+Design thinking asks us to notice those moments. To step away from the comfort of our own assumptions. To meet people where the problem actually lives. To frame with care, imagine with courage, build before debating, and test in order to learn. [pause:long]
+
+[emphasis]The goal is not to think like a designer. The goal is to design a world in which people are understood.[/emphasis]
+
+And that work can begin with one question: [pause:short] Who are we designing for—and what have we not yet taken the time to see?
+
