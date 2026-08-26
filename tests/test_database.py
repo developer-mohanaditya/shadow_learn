@@ -13,6 +13,10 @@ def test_database_initializes_and_survives_reopen(tmp_path: Path):
     reopened = Database(path)
     reopened.initialize()
     assert reopened.fetch_one("SELECT title FROM generations WHERE id='one'")["title"] == "Title"
+    kokoro = reopened.fetch_all("SELECT * FROM voices WHERE engine='kokoro'")
+    assert len(kokoro) == 28
+    assert any(voice["id"] == "kokoro-am-michael" for voice in kokoro)
+    assert any(voice["id"] == "kokoro-bm-fable" for voice in kokoro)
 
 
 def test_backup_passes_integrity_check():
@@ -21,4 +25,3 @@ def test_backup_passes_integrity_check():
     backup = database.create_backup()
     assert backup["integrity_ok"] is True
     assert Path(backup["path"]).is_file()
-

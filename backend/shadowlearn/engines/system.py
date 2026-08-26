@@ -23,7 +23,7 @@ class SystemSpeechEngine(SpeechEngine):
             capabilities={
                 "voice_cloning": False,
                 "presets": True,
-                "accents": ["us", "uk"],
+                "accents": ["us", "uk", "in", "au", "ie", "za"],
                 "development_only": True,
             },
         )
@@ -39,7 +39,9 @@ class SystemSpeechEngine(SpeechEngine):
         if cancelled.is_set():
             raise InterruptedError("Generation cancelled")
         aiff = output.with_suffix(".aiff.part")
-        name = "Daniel" if (voice or {}).get("accent") == "uk" else "Samantha"
+        name = str((voice or {}).get("name") or "").removesuffix(" (macOS)")
+        if not name:
+            name = "Daniel" if (voice or {}).get("accent") == "uk" else "Samantha"
         pace = float(options.get("pace", 1.0))
         rate = max(90, min(260, round(175 * pace)))
         subprocess.run(
@@ -53,4 +55,3 @@ class SystemSpeechEngine(SpeechEngine):
             capture_output=True,
         )
         aiff.unlink(missing_ok=True)
-

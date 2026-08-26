@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
+import shutil
 import sqlite3
+import subprocess
 import threading
 from contextlib import contextmanager
 from datetime import UTC, datetime
@@ -146,18 +149,34 @@ class Database:
             )
 
     def seed_presets(self) -> None:
+        kokoro_voices = {
+            "us": (
+                "af_heart", "af_alloy", "af_aoede", "af_bella", "af_jessica",
+                "af_kore", "af_nicole", "af_nova", "af_river", "af_sarah", "af_sky",
+                "am_adam", "am_echo", "am_eric", "am_fenrir", "am_liam", "am_michael",
+                "am_onyx", "am_puck", "am_santa",
+            ),
+            "uk": (
+                "bf_alice", "bf_emma", "bf_isabella", "bf_lily",
+                "bm_daniel", "bm_fable", "bm_george", "bm_lewis",
+            ),
+        }
         presets = [
-            ("kokoro-af-heart", "Heart", "kokoro", "us"),
-            ("kokoro-af-bella", "Bella", "kokoro", "us"),
-            ("kokoro-am-adam", "Adam", "kokoro", "us"),
-            ("kokoro-bf-emma", "Emma", "kokoro", "uk"),
-            ("kokoro-bm-george", "George", "kokoro", "uk"),
+            (
+                f"kokoro-{voice.replace('_', '-')}",
+                voice.split("_", 1)[1].replace("_", " ").title(),
+                "kokoro",
+                accent,
+            )
+            for accent, voices in kokoro_voices.items()
+            for voice in voices
+        ]
+        presets.extend([
             ("zonos2-american-female", "American Female", "zonos2", "us"),
             ("zonos2-american-male", "American Male", "zonos2", "us"),
             ("zonos2-british-female", "British Female", "zonos2", "uk"),
-            ("system-samantha", "Samantha (macOS)", "system", "us"),
-            ("system-daniel", "Daniel (macOS)", "system", "uk"),
-        ]
+        ])
+        presets.extend(self._system_english_presets())
         timestamp = now_iso()
         with self.transaction() as connection:
             for voice_id, name, engine, accent in presets:
@@ -165,6 +184,32 @@ class Database:
                     "INSERT OR IGNORE INTO voices(id,name,engine,accent,kind,consented,created_at,updated_at) VALUES (?,?,?,?, 'preset',1,?,?)",
                     (voice_id, name, engine, accent, timestamp, timestamp),
                 )
+
+    @staticmethod
+    def _system_english_presets() -> list[tuple[str, str, str, str]]:
+        if not shutil.which("say"):
+            return []
+        try:
+            output = subprocess.run(
+                ["/usr/bin/say", "-v", "?"], check=True, capture_output=True, text=True
+            ).stdout
+        except (OSError, subprocess.CalledProcessError):
+            return []
+        accent_by_locale = {
+            "en_US": "us", "en_GB": "uk", "en_IN": "in",
+            "en_AU": "au", "en_IE": "ie", "en_ZA": "za",
+        }
+        result = []
+        for line in output.splitlines():
+            match = re.match(r"^(.+?)\s{2,}(en_[A-Z]{2})\s+#", line)
+            if not match:
+                continue
+            name, locale = match.groups()
+            slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+            result.append(
+                (f"system-{slug}", f"{name} (macOS)", "system", accent_by_locale.get(locale, "us"))
+            )
+        return result
 
     def fetch_all(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
         with self.connect() as connection:

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import WaveSurfer from 'wavesurfer.js'
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js'
+import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js'
 import type { Generation } from './types'
 
 interface Props {
@@ -14,10 +15,16 @@ export default function WavePlayer({generation}: Props) {
   const [playing, setPlaying] = useState(false)
   const [active, setActive] = useState(-1)
   const [speed, setSpeed] = useState(1)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(generation.duration || 0)
 
   useEffect(() => {
     if (!waveform.current || !generation.audio?.mp3) return
     const regions = RegionsPlugin.create()
+    const timeline = TimelinePlugin.create({
+      height: 22,
+      style: {fontSize: '9px', color: '#77736a'},
+    })
     const instance = WaveSurfer.create({
       container: waveform.current,
       url: generation.audio.mp3,
@@ -30,10 +37,12 @@ export default function WavePlayer({generation}: Props) {
       barGap: 2,
       barRadius: 2,
       normalize: true,
-      plugins: [regions],
+      plugins: [regions, timeline],
     })
     wave.current = instance
     instance.on('ready', () => {
+      setDuration(instance.getDuration())
+      setCurrentTime(instance.getCurrentTime())
       generation.phrases?.forEach((phrase, index) => {
         if (phrase.start_time == null || phrase.end_time == null) return
         regions.addRegion({
@@ -46,9 +55,10 @@ export default function WavePlayer({generation}: Props) {
       const index = generation.phrases?.findIndex(p => p.start_time != null && p.end_time != null && current >= p.start_time && current < p.end_time) ?? -1
       setActive(previous => previous === index ? previous : index)
     })
+    instance.on('timeupdate', current => setCurrentTime(current))
     instance.on('play', () => setPlaying(true))
     instance.on('pause', () => setPlaying(false))
-    instance.on('finish', () => setPlaying(false))
+    instance.on('finish', () => { setPlaying(false); setCurrentTime(instance.getDuration()) })
     regions.on('region-clicked', region => {
       instance.setTime(region.start)
       instance.play()
@@ -88,6 +98,7 @@ export default function WavePlayer({generation}: Props) {
       </div>
     </div>
     <div ref={waveform} className="waveform" />
+    <div className="wave-time-row" aria-live="off"><span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span></div>
     <div className="transport">
       <button onClick={() => seek(-10)}>−10</button>
       <button className="play" onClick={() => wave.current?.playPause()}>{playing ? 'Pause' : 'Play'}</button>
@@ -108,3 +119,8 @@ export default function WavePlayer({generation}: Props) {
   </section>
 }
 
+function formatTime(value: number) {
+  if (!Number.isFinite(value) || value < 0) return '0:00'
+  const seconds = Math.floor(value)
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+}

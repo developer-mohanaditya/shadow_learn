@@ -10,6 +10,10 @@ const nav: {id: Page; label: string; glyph: string}[] = [
   {id: 'settings', label: 'Settings', glyph: '⌁'},
 ]
 const voicePreviewText = 'The morning air feels crisp and bright. Take a steady breath, speak clearly, and let every sentence flow naturally.'
+const accentLabels: Record<string, string> = {
+  us: 'General American', uk: 'Standard British', in: 'Indian English',
+  au: 'Australian English', ie: 'Irish English', za: 'South African English',
+}
 
 export default function App() {
   const [page, setPage] = useState<Page>('studio')
@@ -41,7 +45,7 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
   const [text, setText] = useState('')
   const [engine, setEngine] = useState('')
   const [voice, setVoice] = useState('')
-  const [accent, setAccent] = useState<'us'|'uk'>('us')
+  const [accent, setAccent] = useState('us')
   const [pace, setPace] = useState(1)
   const [mood, setMood] = useState('neutral')
   const [expressiveness, setExpressiveness] = useState(.5)
@@ -55,7 +59,7 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
     setEngine(selected.engine)
     setVoice(selected.voice_id || '')
     const saved = selected.settings || {}
-    if (saved.accent === 'us' || saved.accent === 'uk') setAccent(saved.accent)
+    if (typeof saved.accent === 'string') setAccent(saved.accent)
     if (typeof saved.pace === 'number') setPace(saved.pace)
     if (typeof saved.mood === 'string') setMood(saved.mood)
     if (typeof saved.expressiveness === 'number') setExpressiveness(saved.expressiveness)
@@ -68,6 +72,10 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
       engines.find(item => item.available)?.id || ''
     )
   }, [engines, engine, selected?.engine])
+  const engineAccents = useMemo(() => engines.find(item => item.id === engine)?.capabilities.accents || ['us'], [engines, engine])
+  useEffect(() => {
+    if (!engineAccents.includes(accent)) setAccent(engineAccents[0] || 'us')
+  }, [accent, engineAccents])
   const compatibleVoices = useMemo(() => voices.filter(item => item.engine === engine && item.accent === accent), [voices, engine, accent])
   useEffect(() => {
     const savedVoice = selected?.engine === engine ? selected.voice_id : undefined
@@ -116,7 +124,7 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
       <div className="character-count">{text.length.toLocaleString()} / 25,000 characters</div>
       <div className="controls-grid">
         <label>Engine<select value={engine} onChange={event => setEngine(event.target.value)}>{engines.map(item => <option key={item.id} value={item.id} disabled={!item.available}>{item.name}{!item.available ? ' — not installed' : ''}</option>)}</select></label>
-        <label>Accent<select value={accent} onChange={event => setAccent(event.target.value as 'us'|'uk')}><option value="us">General American</option><option value="uk">Standard British</option></select></label>
+        <label>Accent<select value={accent} onChange={event => setAccent(event.target.value)}>{engineAccents.map(value => <option value={value} key={value}>{accentLabels[value] || value.toUpperCase()}</option>)}</select></label>
         <label>Voice<select value={voice} onChange={event => setVoice(event.target.value)}><option value="">Engine default</option>{compatibleVoices.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label>
         <label>Mood<select value={mood} onChange={event => setMood(event.target.value)}>{['neutral','friendly','formal','cheerful','serious','dramatic'].map(value => <option key={value} value={value}>{value[0].toUpperCase()+value.slice(1)}</option>)}</select></label>
         <label>Pace <output>{pace.toFixed(2)}×</output><input type="range" min=".75" max="1.25" step=".05" value={pace} onChange={event => setPace(Number(event.target.value))}/></label>
@@ -149,7 +157,17 @@ function Voices({voices, engines, refresh}: {voices: Voice[]; engines: Engine[];
   const previewUrls = useRef(new Map<string, string>())
   const [loadingPreview, setLoadingPreview] = useState<string | null>(null)
   const [playingPreview, setPlayingPreview] = useState<string | null>(null)
+  const [previewTime, setPreviewTime] = useState(0)
+  const [previewDuration, setPreviewDuration] = useState(0)
   const [previewError, setPreviewError] = useState('')
+  const [libraryEngine, setLibraryEngine] = useState('all')
+  const [libraryAccent, setLibraryAccent] = useState('all')
+  const filteredVoices = useMemo(() => voices.filter(item =>
+    (libraryEngine === 'all' || item.engine === libraryEngine) &&
+    (libraryAccent === 'all' || item.accent === libraryAccent)
+  ), [voices, libraryEngine, libraryAccent])
+  const libraryEngines = useMemo(() => [...new Set(voices.map(item => item.engine))].sort(), [voices])
+  const libraryAccents = useMemo(() => [...new Set(voices.map(item => item.accent))].sort(), [voices])
   useEffect(() => {
     const choices = engines.filter(item => item.available && item.capabilities.voice_cloning)
     if (choices.length && !choices.some(item => item.id === engine)) setEngine(choices[0].id)
@@ -169,6 +187,8 @@ function Voices({voices, engines, refresh}: {voices: Voice[]; engines: Engine[];
     }
     previewAudio.current?.pause()
     setPlayingPreview(null)
+    setPreviewTime(0)
+    setPreviewDuration(0)
     setLoadingPreview(item.id)
     try {
       let url = previewUrls.current.get(item.id)
@@ -180,7 +200,9 @@ function Voices({voices, engines, refresh}: {voices: Voice[]; engines: Engine[];
       const audio = new Audio(url)
       previewAudio.current = audio
       previewVoice.current = item.id
-      audio.onended = () => setPlayingPreview(null)
+      audio.onloadedmetadata = () => setPreviewDuration(audio.duration)
+      audio.ontimeupdate = () => setPreviewTime(audio.currentTime)
+      audio.onended = () => { setPlayingPreview(null); setPreviewTime(audio.duration) }
       audio.onerror = () => { setPlayingPreview(null); setPreviewError(`Could not play ${item.name}.`) }
       await audio.play()
       setPlayingPreview(item.id)
@@ -215,7 +237,7 @@ function Voices({voices, engines, refresh}: {voices: Voice[]; engines: Engine[];
         <label className="checkbox"><input type="checkbox" checked={consented} onChange={event => setConsented(event.target.checked)}/>I own this voice or have explicit permission to use it.</label>
         <button className="primary" disabled={!file || !consented} onClick={save}>Save voice profile</button>{message && <p className="message">{message}</p>}
       </section>
-      <section className="panel voice-library-panel"><h2>Available voices</h2><p className="preview-script"><span>PREVIEW SCRIPT</span>“{voicePreviewText}”</p>{previewError && <div className="preview-error">{previewError}</div>}<div className="voice-list">{voices.map(item => <div className={playingPreview === item.id ? 'voice-item playing' : 'voice-item'} key={item.id}><button className="voice-preview" aria-label={`${playingPreview === item.id ? 'Pause' : 'Play'} preview for ${item.name}`} disabled={loadingPreview !== null && loadingPreview !== item.id} onClick={() => togglePreview(item)}><span>{loadingPreview === item.id ? '···' : playingPreview === item.id ? 'Ⅱ' : '▶'}</span></button><div className="avatar">{item.name[0]}</div><div className="voice-identity"><strong>{item.name}</strong><span>{item.accent.toUpperCase()} · {item.engine} · {item.kind}</span></div>{item.kind === 'cloned' && <button className="voice-delete" onClick={async () => {await api.deleteVoice(item.id); await refresh()}}>Delete</button>}</div>)}</div></section>
+      <section className="panel voice-library-panel"><h2>Available voices <small>{filteredVoices.length} of {voices.length}</small></h2><p className="preview-script"><span>PREVIEW SCRIPT</span>“{voicePreviewText}”</p><div className="voice-filter-row"><select aria-label="Filter voices by engine" value={libraryEngine} onChange={event => setLibraryEngine(event.target.value)}><option value="all">All engines</option>{libraryEngines.map(value => <option value={value} key={value}>{engines.find(item => item.id === value)?.name || value}</option>)}</select><select aria-label="Filter voices by accent" value={libraryAccent} onChange={event => setLibraryAccent(event.target.value)}><option value="all">All English accents</option>{libraryAccents.map(value => <option value={value} key={value}>{accentLabels[value] || value.toUpperCase()}</option>)}</select></div>{previewError && <div className="preview-error">{previewError}</div>}<div className="voice-list">{filteredVoices.map(item => <div className={playingPreview === item.id ? 'voice-item playing' : 'voice-item'} key={item.id}><button className="voice-preview" aria-label={`${playingPreview === item.id ? 'Pause' : 'Play'} preview for ${item.name}`} disabled={loadingPreview !== null && loadingPreview !== item.id} onClick={() => togglePreview(item)}><span>{loadingPreview === item.id ? '···' : playingPreview === item.id ? 'Ⅱ' : '▶'}</span></button><div className="avatar">{item.name[0]}</div><div className="voice-identity"><strong>{item.name}</strong><span>{accentLabels[item.accent] || item.accent.toUpperCase()} · {item.engine} · {item.kind}</span>{previewVoice.current === item.id && <span className="voice-preview-time">{formatTime(previewTime)} / {formatTime(previewDuration)}</span>}</div>{item.kind === 'cloned' && <button className="voice-delete" onClick={async () => {await api.deleteVoice(item.id); await refresh()}}>Delete</button>}</div>)}</div></section>
     </div>
   </div>
 }
@@ -223,10 +245,47 @@ function Voices({voices, engines, refresh}: {voices: Voice[]; engines: Engine[];
 function History({onOpen}: {onOpen: (id: string) => void}) {
   const [items, setItems] = useState<Generation[]>([])
   const [query, setQuery] = useState('')
+  const audio = useRef<HTMLAudioElement | null>(null)
+  const playingId = useRef<string | null>(null)
+  const [playing, setPlaying] = useState<string | null>(null)
+  const [playTime, setPlayTime] = useState(0)
+  const [playDuration, setPlayDuration] = useState(0)
+  const [playError, setPlayError] = useState('')
   const load = useCallback(() => api.generations(query).then(result => setItems(result.items)), [query])
   useEffect(() => { load().catch(console.error) }, [load])
+  useEffect(() => () => { audio.current?.pause() }, [])
+  const stopPlayback = () => {
+    audio.current?.pause()
+    audio.current = null
+    playingId.current = null
+    setPlaying(null)
+    setPlayTime(0)
+    setPlayDuration(0)
+  }
+  const togglePlayback = async (item: Generation) => {
+    setPlayError('')
+    if (playingId.current === item.id && audio.current) {
+      if (audio.current.paused) { await audio.current.play(); setPlaying(item.id) }
+      else { audio.current.pause(); setPlaying(null) }
+      return
+    }
+    stopPlayback()
+    const source = item.audio?.mp3
+    if (!source) { setPlayError('This generation has no playable MP3 artifact.'); return }
+    const player = new Audio(source)
+    audio.current = player
+    playingId.current = item.id
+    setPlayDuration(item.duration || 0)
+    player.onloadedmetadata = () => setPlayDuration(player.duration)
+    player.ontimeupdate = () => setPlayTime(player.currentTime)
+    player.onended = () => stopPlayback()
+    player.onerror = () => { stopPlayback(); setPlayError(`Could not play “${item.title}”.`) }
+    try { await player.play(); setPlaying(item.id) }
+    catch (cause) { stopPlayback(); setPlayError(cause instanceof Error ? cause.message : String(cause)) }
+  }
   return <div className="page"><header><div><span className="eyebrow">ARCHIVE</span><h1>History</h1><p>Every script and finished practice recording.</p></div><input className="search" placeholder="Search scripts…" value={query} onChange={event => setQuery(event.target.value)}/></header>
-    <section className="history-list">{items.length === 0 && <div className="empty">No generations yet.</div>}{items.map(item => <article key={item.id}><div className={`state ${item.status}`}/><div className="history-main"><strong>{item.title}</strong><span>{new Date(item.created_at).toLocaleString()} · {item.engine} {item.duration ? `· ${item.duration < 60 ? `${Math.round(item.duration)} sec` : `${Math.round(item.duration/60)} min`}` : ''}</span>{item.error && <small>{item.error}</small>}</div><div className="history-actions">{item.status === 'complete' && <button onClick={() => onOpen(item.id)}>Open</button>}{['failed','interrupted','cancelled'].includes(item.status) && <button onClick={async () => {await api.resume(item.id); await load()}}>Resume</button>}<button className="danger" onClick={async () => {if(confirm('Delete this generation and its audio?')) {await api.deleteGeneration(item.id); await load()}}}>Delete</button></div></article>)}</section>
+    {playError && <div className="error-banner history-error">{playError}</div>}
+    <section className="history-list">{items.length === 0 && <div className="empty">No generations yet.</div>}{items.map(item => <article className={playingId.current === item.id ? 'history-playing' : ''} key={item.id}><div className={`state ${item.status}`}/><div className="history-main"><strong>{item.title}</strong><span>{new Date(item.created_at).toLocaleString()} · {item.engine} {item.duration ? `· ${formatTime(item.duration)}` : ''}</span>{playingId.current === item.id && <span className="history-time">{formatTime(playTime)} / {formatTime(playDuration || item.duration || 0)}</span>}{item.error && <small>{item.error}</small>}</div><div className="history-actions">{item.status === 'complete' && <button className={playing === item.id ? 'inline-playing' : ''} onClick={() => togglePlayback(item)}>{playing === item.id ? 'Pause' : '▶ Play'}</button>}{item.status === 'complete' && <button onClick={() => onOpen(item.id)}>Open</button>}{['failed','interrupted','cancelled'].includes(item.status) && <button onClick={async () => {await api.resume(item.id); await load()}}>Resume</button>}<button className="danger" onClick={async () => {if(confirm('Delete this generation and its audio?')) {if (playingId.current === item.id) stopPlayback(); await api.deleteGeneration(item.id); await load()}}}>Delete</button></div></article>)}</section>
   </div>
 }
 
@@ -248,4 +307,10 @@ function formatBytes(value: number) {
   if (!value) return '0 B'
   const unit = Math.floor(Math.log(value) / Math.log(1024))
   return `${(value / 1024 ** unit).toFixed(1)} ${['B','KB','MB','GB','TB'][unit]}`
+}
+
+function formatTime(value: number) {
+  if (!Number.isFinite(value) || value < 0) return '0:00'
+  const seconds = Math.floor(value)
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
