@@ -52,6 +52,12 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const textarea = useRef<HTMLTextAreaElement>(null)
+  const studioPreview = useRef<HTMLAudioElement | null>(null)
+  const studioPreviewVoice = useRef<string | null>(null)
+  const [previewingVoice, setPreviewingVoice] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewTime, setPreviewTime] = useState(0)
+  const [previewDuration, setPreviewDuration] = useState(0)
 
   useEffect(() => {
     if (!selected?.raw_text) return
@@ -85,6 +91,47 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
       setVoice(compatibleVoices[0]?.id || '')
     }
   }, [compatibleVoices, engine, selected?.engine, selected?.voice_id, voice])
+  useEffect(() => {
+    const current = studioPreview.current
+    if (current) current.pause()
+    studioPreview.current = null
+    studioPreviewVoice.current = null
+    setPreviewingVoice(null)
+    setPreviewTime(0)
+    setPreviewDuration(0)
+  }, [engine, accent, voice])
+  useEffect(() => () => { studioPreview.current?.pause() }, [])
+
+  const toggleStudioPreview = async () => {
+    if (!voice || previewLoading) return
+    setError('')
+    const current = studioPreview.current
+    if (current && studioPreviewVoice.current === voice) {
+      if (current.paused) { if (current.ended) current.currentTime = 0; await current.play(); setPreviewingVoice(voice) }
+      else { current.pause(); setPreviewingVoice(null) }
+      return
+    }
+    current?.pause()
+    setPreviewLoading(true)
+    setPreviewTime(0)
+    setPreviewDuration(0)
+    try {
+      const preview = await api.voicePreview(voice)
+      const player = new Audio(preview.audio_url)
+      studioPreview.current = player
+      studioPreviewVoice.current = voice
+      player.onloadedmetadata = () => setPreviewDuration(player.duration)
+      player.ontimeupdate = () => setPreviewTime(player.currentTime)
+      player.onended = () => { setPreviewingVoice(null); setPreviewTime(player.duration) }
+      player.onerror = () => { setPreviewingVoice(null); setError('Could not play the selected voice preview.') }
+      await player.play()
+      setPreviewingVoice(voice)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
 
   const generate = async () => {
     setBusy(true); setError(''); onSelected(null)
@@ -125,7 +172,7 @@ function Studio({engines, voices, selected, onSelected}: {engines: Engine[]; voi
       <div className="controls-grid">
         <label>Engine<select value={engine} onChange={event => setEngine(event.target.value)}>{engines.map(item => <option key={item.id} value={item.id} disabled={!item.available}>{item.name}{!item.available ? ' — not installed' : ''}</option>)}</select></label>
         <label>Accent<select value={accent} onChange={event => setAccent(event.target.value)}>{engineAccents.map(value => <option value={value} key={value}>{accentLabels[value] || value.toUpperCase()}</option>)}</select></label>
-        <label>Voice<select value={voice} onChange={event => setVoice(event.target.value)}><option value="">Engine default</option>{compatibleVoices.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label>
+        <label>Voice<div className="studio-voice-select"><select value={voice} onChange={event => setVoice(event.target.value)}><option value="">Engine default</option>{compatibleVoices.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}</select><button type="button" className={previewingVoice === voice ? 'studio-voice-preview playing' : 'studio-voice-preview'} disabled={!voice || previewLoading} onClick={toggleStudioPreview} aria-label={`${previewingVoice === voice ? 'Pause' : 'Play'} selected voice preview`}>{previewLoading ? '···' : previewingVoice === voice ? 'Ⅱ' : '▶'}</button></div>{(previewDuration > 0 || previewLoading) && <span className="studio-preview-time">{previewLoading ? 'Preparing local preview…' : `${formatTime(previewTime)} / ${formatTime(previewDuration)}`}</span>}</label>
         <label>Mood<select value={mood} onChange={event => setMood(event.target.value)}>{['neutral','friendly','formal','cheerful','serious','dramatic'].map(value => <option key={value} value={value}>{value[0].toUpperCase()+value.slice(1)}</option>)}</select></label>
         <label>Pace <output>{pace.toFixed(2)}×</output><input type="range" min=".75" max="1.25" step=".05" value={pace} onChange={event => setPace(Number(event.target.value))}/></label>
         <label>Expression <output>{expressiveness.toFixed(1)}</output><input type="range" min="0" max="1.5" step=".1" value={expressiveness} onChange={event => setExpressiveness(Number(event.target.value))}/></label>
