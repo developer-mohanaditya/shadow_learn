@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import shutil
+import unicodedata
 from pathlib import Path
 from threading import Event, Lock
 from uuid import uuid4
@@ -25,6 +27,13 @@ VOICE_PREVIEW_TEXT = (
     "and let every sentence flow naturally."
 )
 voice_preview_lock = Lock()
+
+
+def audio_download_name(title: str, audio_format: str) -> str:
+    """Return a short, portable filename for saved generation audio."""
+    ascii_title = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode()
+    slug = re.sub(r"[^a-z0-9]+", "-", ascii_title.lower()).strip("-")
+    return f"{(slug or 'shadowlearn-audio')[:72]}.{audio_format}"
 
 
 def generation_detail(generation_id: str) -> dict:
@@ -164,14 +173,21 @@ def delete_generation(generation_id: str):
 def generation_audio(generation_id: str, audio_format: str):
     if audio_format not in {"wav", "mp3"}:
         raise HTTPException(404, "Unsupported format")
-    row = db.fetch_one("SELECT wav_path,mp3_path FROM generations WHERE id=?", (generation_id,))
+    row = db.fetch_one(
+        "SELECT title,wav_path,mp3_path FROM generations WHERE id=?", (generation_id,)
+    )
     if not row:
         raise HTTPException(404, "Generation not found")
     path = Path(row[f"{audio_format}_path"] or "")
     if not path.is_file():
         raise HTTPException(404, "Audio artifact is missing")
     media_type = "audio/wav" if audio_format == "wav" else "audio/mpeg"
-    return FileResponse(path, media_type=media_type, filename=path.name)
+    return FileResponse(
+        path,
+        media_type=media_type,
+        filename=audio_download_name(row["title"], audio_format),
+        content_disposition_type="attachment",
+    )
 
 
 @router.get("/voices")

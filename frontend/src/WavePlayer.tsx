@@ -93,8 +93,12 @@ export default function WavePlayer({generation}: Props) {
     <div className="player-heading">
       <div><span className="eyebrow">NOW SHADOWING</span><h2>{generation.title}</h2></div>
       <div className="download-row">
-        <a className="small-button" href={generation.audio.wav} download>WAV</a>
-        <a className="small-button" href={generation.audio.mp3} download>MP3</a>
+        {generation.audio?.mp3 && <a className="download-button primary-download" href={generation.audio.mp3} download>
+          <span aria-hidden="true">↓</span><span><strong>Download MP3</strong><small>Best for any device</small></span>
+        </a>}
+        {generation.audio?.wav && <a className="download-button" href={generation.audio.wav} download>
+          <span aria-hidden="true">↓</span><span><strong>WAV</strong><small>Lossless audio</small></span>
+        </a>}
       </div>
     </div>
     <div ref={waveform} className="waveform" />
