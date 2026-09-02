@@ -113,7 +113,8 @@ def breeze(payload: dict) -> None:
     description = str(voice.get("description") or options.get("voice_description") or "").strip()
     accent = str(options.get("accent_direction") or "").strip()
     direction = str(options.get("direction") or "Speak clearly and naturally.").strip()
-    instruction = " ".join(part for part in (description, accent, direction) if part)
+    accent_instruction = f"Use a natural {accent} accent." if accent else ""
+    instruction = " ".join(part for part in (description, accent_instruction, direction) if part)
     request = {"text": payload["text"], "instruction": instruction, "speaker": "S0"}
     template = "tts_instruction"
     audio_codes = None
@@ -127,20 +128,27 @@ def breeze(payload: dict) -> None:
 
     mode = str(options.get("mode", "design"))
     cfg_default = 1.0 if mode == "clone" else 4.0
-    parts = [
-        chunk.audio
-        for chunk in runtime.stream(
-            request,
-            template=template,
-            cfg_scale=float(options.get("cfg_scale", cfg_default)),
-            seed=int(options.get("seed", 42)),
-            audio_codes=audio_codes,
-        )
-        if chunk.audio.size
-    ]
-    audio = np.concatenate(parts) if parts else np.zeros(0, np.float32)
+    base_seed = int(options.get("seed", 42))
+    audio = np.zeros(0, np.float32)
+    # Voice design can occasionally sample EOS as its first token for a valid
+    # prompt. Retry only that empty result with deterministic alternate seeds.
+    for seed in (base_seed, base_seed + 1, base_seed + 17):
+        parts = [
+            chunk.audio
+            for chunk in runtime.stream(
+                request,
+                template=template,
+                cfg_scale=float(options.get("cfg_scale", cfg_default)),
+                seed=seed,
+                audio_codes=audio_codes,
+            )
+            if chunk.audio.size
+        ]
+        audio = np.concatenate(parts) if parts else np.zeros(0, np.float32)
+        if audio.size:
+            break
     if not audio.size:
-        raise RuntimeError("Breeze returned no audio")
+        raise RuntimeError("Breeze returned no audio after retrying valid sampling seeds")
     sf.write(payload["output"], audio, runtime.codec.sample_rate, subtype="PCM_16")
 
 

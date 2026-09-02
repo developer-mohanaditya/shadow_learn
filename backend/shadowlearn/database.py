@@ -253,6 +253,79 @@ class Database:
                     "INSERT OR IGNORE INTO voices(id,name,engine,accent,kind,consented,created_at,updated_at) VALUES (?,?,?,?, 'preset',1,?,?)",
                     (voice_id, name, engine, accent, timestamp, timestamp),
                 )
+            for voice_id, name, accent_direction, description, seed, cfg_scale in (
+                (
+                    "breeze-starter-miles",
+                    "Miles",
+                    "General American English",
+                    "A warm, confident adult male voice with a natural conversational quality.",
+                    42,
+                    4.0,
+                ),
+                (
+                    "breeze-starter-aria",
+                    "Aria",
+                    "General American English",
+                    "A clear, friendly adult female voice with a bright, professional tone.",
+                    73,
+                    4.0,
+                ),
+                (
+                    "breeze-starter-arjun",
+                    "Arjun",
+                    "Indian English",
+                    "A calm, articulate adult male voice with warmth and quiet confidence.",
+                    116,
+                    4.0,
+                ),
+                (
+                    "breeze-starter-priya",
+                    "Priya",
+                    "Indian English",
+                    "A poised, clear adult female voice with an engaging conversational style.",
+                    157,
+                    4.0,
+                ),
+                (
+                    "breeze-starter-oliver",
+                    "Oliver",
+                    "British English",
+                    "A composed adult male voice with a refined, approachable delivery.",
+                    211,
+                    4.0,
+                ),
+                (
+                    "breeze-starter-eleanor",
+                    "Eleanor",
+                    "British English",
+                    "A polished adult female voice with a warm, intelligent presence.",
+                    263,
+                    4.0,
+                ),
+                (
+                    "breeze-starter-maya",
+                    "Maya",
+                    "Neutral international English",
+                    "A balanced adult voice with clear diction and a relaxed global style.",
+                    307,
+                    4.0,
+                ),
+            ):
+                connection.execute(
+                    "INSERT OR IGNORE INTO breeze_voices("
+                    "id,name,kind,language,accent_direction,description,seed,cfg_scale,"
+                    "consented,created_at,updated_at) VALUES (?,?, 'designed','en',?,?,?,?,1,?,?)",
+                    (
+                        voice_id,
+                        name,
+                        accent_direction,
+                        description,
+                        seed,
+                        cfg_scale,
+                        timestamp,
+                        timestamp,
+                    ),
+                )
 
     @staticmethod
     def _system_english_presets() -> list[tuple[str, str, str, str]]:

@@ -95,6 +95,11 @@ def create_generation(payload: BreezeGenerationCreate) -> dict:
             "direction", "model_variant",
         }
     )
+    # A saved designed voice is a reproducible profile. Its seed and guidance
+    # are part of that profile, rather than generic studio defaults.
+    if voice and voice["kind"] == "designed":
+        settings_json["seed"] = voice["seed"]
+        settings_json["cfg_scale"] = voice["cfg_scale"]
     with db.transaction() as connection:
         connection.execute(
             "INSERT INTO breeze_generations(id,title,raw_text,normalized_text,mode,language,"
