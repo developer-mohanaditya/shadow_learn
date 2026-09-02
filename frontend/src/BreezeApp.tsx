@@ -55,16 +55,18 @@ function BreezeStudio({voices, capabilities, selected, onSelected}: {voices: Bre
   const [error, setError] = useState('')
   const [previewing, setPreviewing] = useState(false)
   const preview = useRef<HTMLAudioElement | null>(null)
-  const compatible = useMemo(() => voices.filter(v => v.language === language && (mode === 'design' ? v.kind === 'designed' : v.kind === 'cloned')), [voices, language, mode])
+  const compatible = useMemo(() => voices.filter(v =>
+    v.language === language &&
+    (mode === 'design' ? v.kind === 'designed' && v.accent_direction === accent : v.kind === 'cloned')
+  ), [accent, voices, language, mode])
   useEffect(() => {if (!compatible.some(v => v.id === voiceId)) setVoiceId(compatible[0]?.id || '')}, [compatible, voiceId])
   useEffect(() => {
-    const selectedVoice = voices.find(v => v.id === voiceId)
-    if (mode === 'design' && selectedVoice?.accent_direction) {
-      setAccent(selectedVoice.accent_direction)
+    const selectedVoice = compatible.find(v => v.id === voiceId)
+    if (mode === 'design' && selectedVoice) {
       setSeed(selectedVoice.seed)
       setCfg(selectedVoice.cfg_scale)
     }
-  }, [mode, voiceId, voices])
+  }, [compatible, mode, voiceId])
   useEffect(() => {
     if (!selected?.raw_text) return
     setText(selected.raw_text); setMode(selected.mode); setLanguage(selected.language); setAccent(selected.accent_direction || accent)
