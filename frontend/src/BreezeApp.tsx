@@ -44,7 +44,9 @@ function BreezeStudio({voices, capabilities, selected, onSelected}: {voices: Bre
   const [mode, setMode] = useState<'design' | 'clone' | 'direction'>('design')
   const [language, setLanguage] = useState<'en' | 'zh'>('en')
   const [accent, setAccent] = useState('General American English')
-  const [voiceId, setVoiceId] = useState('')
+  // undefined means the studio has not chosen its initial starter voice yet;
+  // an empty string is the user's explicit "Custom voice description" choice.
+  const [voiceId, setVoiceId] = useState<string | undefined>(undefined)
   const [description, setDescription] = useState('A warm, confident adult male voice with a natural conversational quality.')
   const [direction, setDirection] = useState('Speak clearly and naturally at a measured pace, with thoughtful pauses and expressive emphasis.')
   const [seed, setSeed] = useState(42)
@@ -59,7 +61,10 @@ function BreezeStudio({voices, capabilities, selected, onSelected}: {voices: Bre
     v.language === language &&
     (mode === 'design' ? v.kind === 'designed' && v.accent_direction === accent : v.kind === 'cloned')
   ), [accent, voices, language, mode])
-  useEffect(() => {if (!compatible.some(v => v.id === voiceId)) setVoiceId(compatible[0]?.id || '')}, [compatible, voiceId])
+  useEffect(() => {
+    if (voiceId === undefined && compatible.length) setVoiceId(compatible[0].id)
+    else if (voiceId && !compatible.some(v => v.id === voiceId)) setVoiceId(compatible[0]?.id || '')
+  }, [compatible, voiceId])
   useEffect(() => {
     const selectedVoice = compatible.find(v => v.id === voiceId)
     if (mode === 'design' && selectedVoice) {
@@ -113,7 +118,7 @@ function BreezeStudio({voices, capabilities, selected, onSelected}: {voices: Bre
       <div className="breeze-controls">
         <label>Language<select value={language} onChange={event => setLanguage(event.target.value as 'en' | 'zh')}><option value="en">English</option><option value="zh">Chinese</option></select></label>
         {language === 'en' && <label>Accent direction<select value={accent} onChange={event => setAccent(event.target.value)}>{(capabilities?.english_directions || ['General American English','Indian English','British English','Neutral international English']).map(value => <option key={value}>{value}</option>)}</select></label>}
-        <label>Saved voice<div className="studio-voice-select"><select value={voiceId} onChange={event => setVoiceId(event.target.value)}><option value="">{mode === 'design' ? 'Custom voice description…' : 'Choose a cloned voice'}</option>{compatible.map(v => <option value={v.id} key={v.id}>{v.name} — {v.accent_direction || 'Custom voice'}</option>)}</select><button type="button" className={previewing ? 'studio-voice-preview playing' : 'studio-voice-preview'} disabled={!voiceId} onClick={playPreview}>{previewing ? 'Ⅱ' : '▶'}</button></div></label>
+        <label>Saved voice<div className="studio-voice-select"><select value={voiceId || ''} onChange={event => setVoiceId(event.target.value)}><option value="">{mode === 'design' ? 'Custom voice description…' : 'Choose a cloned voice'}</option>{compatible.map(v => <option value={v.id} key={v.id}>{v.name} — {v.accent_direction || 'Custom voice'}</option>)}</select><button type="button" className={previewing ? 'studio-voice-preview playing' : 'studio-voice-preview'} disabled={!voiceId} onClick={playPreview}>{previewing ? 'Ⅱ' : '▶'}</button></div></label>
       </div>
       {mode === 'design' && !voiceId && <label className="prompt-field">Voice description<textarea value={description} onChange={event => setDescription(event.target.value)} placeholder="Age, timbre, energy, gender presentation, vocal texture…"/></label>}
       <label className="prompt-field">Performance direction<textarea value={direction} onChange={event => setDirection(event.target.value)} placeholder="Describe emotion, pace, delivery, pauses, and vocal events…"/></label>
