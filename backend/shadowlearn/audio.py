@@ -65,7 +65,9 @@ def normalize_reference(source: Path, target: Path) -> None:
     subprocess.run(
         [
             ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", str(source), "-af",
-            "silenceremove=start_periods=1:start_duration=0.1:start_threshold=-45dB:stop_periods=1:stop_duration=0.2:stop_threshold=-45dB,loudnorm=I=-18:TP=-2:LRA=9",
+            "silenceremove=start_periods=1:start_duration=0.1:start_threshold=-45dB,"
+            "areverse,silenceremove=start_periods=1:start_duration=0.2:start_threshold=-45dB,"
+            "areverse,loudnorm=I=-18:TP=-2:LRA=9",
             "-ac", "1", "-ar", "24000", "-c:a", "pcm_s16le", "-f", "wav", str(partial),
         ],
         check=True,
@@ -76,4 +78,3 @@ def normalize_reference(source: Path, target: Path) -> None:
 
 def _escape(path: Path) -> str:
     return str(path.resolve()).replace("'", "'\\''")
-

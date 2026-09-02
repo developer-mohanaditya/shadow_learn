@@ -19,6 +19,9 @@ class Settings:
     frontend_dist: Path
     max_characters: int = 25_000
     zonos_url: str = "http://127.0.0.1:1919"
+    host: str = "127.0.0.1"
+    port: int = 8420
+    breeze_model: Path | None = None
 
     @classmethod
     def load(cls) -> "Settings":
@@ -36,6 +39,13 @@ class Settings:
             temporary=data / "tmp",
             frontend_dist=root / "frontend" / "dist",
             zonos_url=os.environ.get("SHADOW_LEARN_ZONOS_URL", "http://127.0.0.1:1919"),
+            host=os.environ.get("SHADOW_LEARN_HOST", "127.0.0.1"),
+            port=int(os.environ.get("SHADOW_LEARN_PORT", "8420")),
+            breeze_model=(
+                Path(os.environ["SHADOW_LEARN_BREEZE_MODEL"]).expanduser().resolve()
+                if os.environ.get("SHADOW_LEARN_BREEZE_MODEL")
+                else None
+            ),
         )
         result.ensure_directories()
         return result
@@ -54,4 +64,3 @@ class Settings:
 
 
 settings = Settings.load()
-

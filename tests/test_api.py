@@ -21,6 +21,27 @@ def test_empty_generation_is_rejected():
         assert response.status_code == 422
 
 
+def test_breeze_capabilities_and_designed_voice():
+    with TestClient(app) as client:
+        capabilities = client.get("/api/v2/capabilities")
+        assert capabilities.status_code == 200
+        assert capabilities.json()["modes"] == ["design", "clone", "direction"]
+        assert {item["id"] for item in capabilities.json()["languages"]} == {"en", "zh"}
+        created = client.post(
+            "/api/v2/voices/design",
+            json={
+                "name": "Clear coach",
+                "language": "en",
+                "accent_direction": "Indian English",
+                "description": "A warm, clear adult voice with measured pacing.",
+            },
+        )
+        assert created.status_code == 201
+        assert created.json()["kind"] == "designed"
+        voices = client.get("/api/v2/voices")
+        assert any(item["name"] == "Clear coach" for item in voices.json())
+
+
 def test_audio_download_name_is_portable():
     assert audio_download_name("My First Practice: Hello, World!", "mp3") == (
         "my-first-practice-hello-world.mp3"

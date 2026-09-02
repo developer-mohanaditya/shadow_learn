@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from './api'
 import type { Backup, Engine, Generation, Health, Page, Voice } from './types'
 import WavePlayer from './WavePlayer'
+import BreezeApp from './BreezeApp'
+import VersionSwitch from './VersionSwitch'
 
 const nav: {id: Page; label: string; glyph: string}[] = [
   {id: 'studio', label: 'Speech Studio', glyph: '✦'},
@@ -16,6 +18,23 @@ const accentLabels: Record<string, string> = {
 }
 
 export default function App() {
+  const initial = window.location.pathname.startsWith('/v2') ? 'v2' : 'v1'
+  const [version, setVersion] = useState<'v1' | 'v2'>(initial)
+  const changeVersion = (next: 'v1' | 'v2') => {
+    setVersion(next)
+    window.history.pushState({}, '', next === 'v2' ? '/v2' : '/v1')
+  }
+  useEffect(() => {
+    const followLocation = () => setVersion(window.location.pathname.startsWith('/v2') ? 'v2' : 'v1')
+    window.addEventListener('popstate', followLocation)
+    return () => window.removeEventListener('popstate', followLocation)
+  }, [])
+  return version === 'v2'
+    ? <BreezeApp onVersionChange={changeVersion} />
+    : <ClassicApp onVersionChange={changeVersion} />
+}
+
+function ClassicApp({onVersionChange}: {onVersionChange: (version: 'v1' | 'v2') => void}) {
   const [page, setPage] = useState<Page>('studio')
   const [engines, setEngines] = useState<Engine[]>([])
   const [voices, setVoices] = useState<Voice[]>([])
@@ -28,7 +47,7 @@ export default function App() {
 
   return <div className="app-shell">
     <aside>
-      <div className="brand"><div className="brand-mark">S</div><div><strong>Shadow</strong><span>LEARN</span></div></div>
+      <div className="brand-wrap"><div className="brand"><div className="brand-mark">S</div><div><strong>Shadow</strong><span>LEARN</span></div></div><VersionSwitch version="v1" onChange={onVersionChange}/></div>
       <nav>{nav.map(item => <button key={item.id} className={page === item.id ? 'active' : ''} onClick={() => setPage(item.id)}><span>{item.glyph}</span>{item.label}</button>)}</nav>
       <div className="privacy"><span className="status-dot"/>Private on this Mac<small>Nothing leaves your device</small></div>
     </aside>

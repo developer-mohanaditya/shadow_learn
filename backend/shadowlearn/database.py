@@ -86,7 +86,70 @@ MIGRATIONS: list[tuple[int, str]] = [
             created_at TEXT NOT NULL
         );
         """,
-    )
+    ),
+    (
+        2,
+        """
+        CREATE TABLE IF NOT EXISTS breeze_voices (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            kind TEXT NOT NULL CHECK(kind IN ('designed','cloned')),
+            language TEXT NOT NULL CHECK(language IN ('en','zh')),
+            accent_direction TEXT NOT NULL DEFAULT '',
+            description TEXT NOT NULL DEFAULT '',
+            seed INTEGER NOT NULL DEFAULT 42,
+            cfg_scale REAL NOT NULL DEFAULT 4.0,
+            original_path TEXT,
+            processed_path TEXT,
+            reference_text TEXT,
+            reference_codes_path TEXT,
+            consented INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS breeze_generations (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            raw_text TEXT NOT NULL,
+            normalized_text TEXT NOT NULL,
+            mode TEXT NOT NULL CHECK(mode IN ('design','clone','direction')),
+            language TEXT NOT NULL CHECK(language IN ('en','zh')),
+            accent_direction TEXT NOT NULL DEFAULT '',
+            voice_id TEXT,
+            direction TEXT NOT NULL DEFAULT '',
+            model_variant TEXT NOT NULL DEFAULT 'mixed-4bit',
+            settings_json TEXT NOT NULL,
+            status TEXT NOT NULL,
+            progress REAL NOT NULL DEFAULT 0,
+            error TEXT,
+            wav_path TEXT,
+            mp3_path TEXT,
+            duration REAL,
+            generation_seconds REAL,
+            real_time_factor REAL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(voice_id) REFERENCES breeze_voices(id) ON DELETE SET NULL
+        );
+        CREATE INDEX IF NOT EXISTS breeze_generations_created_at
+            ON breeze_generations(created_at DESC);
+        CREATE TABLE IF NOT EXISTS breeze_phrases (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            generation_id TEXT NOT NULL,
+            phrase_index INTEGER NOT NULL,
+            text TEXT NOT NULL,
+            source_start INTEGER NOT NULL,
+            source_end INTEGER NOT NULL,
+            pause_after_ms INTEGER NOT NULL DEFAULT 0,
+            start_time REAL,
+            end_time REAL,
+            artifact_path TEXT,
+            status TEXT NOT NULL DEFAULT 'pending',
+            UNIQUE(generation_id, phrase_index),
+            FOREIGN KEY(generation_id) REFERENCES breeze_generations(id) ON DELETE CASCADE
+        );
+        """,
+    ),
 ]
 
 
@@ -145,6 +208,12 @@ class Database:
         with self.transaction() as connection:
             connection.execute(
                 "UPDATE generations SET status='interrupted', error='Application stopped during generation', updated_at=? WHERE status IN ('queued','processing')",
+                (now_iso(),),
+            )
+            connection.execute(
+                "UPDATE breeze_generations SET status='interrupted', "
+                "error='Application stopped during generation', updated_at=? "
+                "WHERE status IN ('queued','processing')",
                 (now_iso(),),
             )
 

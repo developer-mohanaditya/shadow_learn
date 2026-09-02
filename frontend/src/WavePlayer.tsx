@@ -6,9 +6,10 @@ import type { Generation } from './types'
 
 interface Props {
   generation: Generation
+  accentColor?: string
 }
 
-export default function WavePlayer({generation}: Props) {
+export default function WavePlayer({generation, accentColor = '#d9ff57'}: Props) {
   const waveform = useRef<HTMLDivElement>(null)
   const script = useRef<HTMLDivElement>(null)
   const wave = useRef<WaveSurfer | null>(null)
@@ -29,7 +30,7 @@ export default function WavePlayer({generation}: Props) {
       container: waveform.current,
       url: generation.audio.mp3,
       waveColor: '#8e8a80',
-      progressColor: '#d9ff57',
+      progressColor: accentColor,
       cursorColor: '#ffffff',
       cursorWidth: 1,
       height: 92,
@@ -47,7 +48,7 @@ export default function WavePlayer({generation}: Props) {
         if (phrase.start_time == null || phrase.end_time == null) return
         regions.addRegion({
           id: String(index), start: phrase.start_time, end: phrase.end_time,
-          color: index % 2 ? 'rgba(217,255,87,.025)' : 'rgba(255,255,255,.025)', drag: false, resize: false,
+          color: index % 2 ? `${accentColor}0a` : 'rgba(255,255,255,.025)', drag: false, resize: false,
         })
       })
     })
@@ -64,7 +65,7 @@ export default function WavePlayer({generation}: Props) {
       instance.play()
     })
     return () => { instance.destroy(); wave.current = null }
-  }, [generation.id, generation.audio?.mp3, generation.phrases])
+  }, [accentColor, generation.id, generation.audio?.mp3, generation.phrases])
 
   useEffect(() => {
     if (active < 0 || !script.current) return

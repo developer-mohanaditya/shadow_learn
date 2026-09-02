@@ -1,4 +1,4 @@
-import type { Backup, Engine, Generation, Health, Voice } from './types'
+import type { Backup, BreezeCapabilities, BreezeGeneration, BreezeVoice, Engine, Generation, Health, Voice } from './types'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options)
@@ -34,4 +34,25 @@ export const api = {
   backups: () => request<Backup[]>('/api/backups'),
   createBackup: () => request<Backup>('/api/backups', {method: 'POST'}),
   restoreBackup: (id: string) => request(`/api/backups/${id}/restore`, {method: 'POST'}),
+}
+
+export const breezeApi = {
+  capabilities: () => request<BreezeCapabilities>('/api/v2/capabilities'),
+  voices: () => request<BreezeVoice[]>('/api/v2/voices'),
+  generations: (q = '') => request<{items: BreezeGeneration[]; total: number}>(`/api/v2/generations?q=${encodeURIComponent(q)}`),
+  generation: (id: string) => request<BreezeGeneration>(`/api/v2/generations/${id}`),
+  createGeneration: (payload: Record<string, unknown>) => request<BreezeGeneration>('/api/v2/generations', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
+  }),
+  cancel: (id: string) => request(`/api/v2/generations/${id}/cancel`, {method: 'POST'}),
+  resume: (id: string) => request<BreezeGeneration>(`/api/v2/generations/${id}/resume`, {method: 'POST'}),
+  deleteGeneration: (id: string) => request(`/api/v2/generations/${id}`, {method: 'DELETE'}),
+  designVoice: (payload: Record<string, unknown>) => request<BreezeVoice>('/api/v2/voices/design', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
+  }),
+  cloneVoice: (data: FormData) => request<BreezeVoice>('/api/v2/voices/clone', {method: 'POST', body: data}),
+  previewVoice: (id: string, payload: Record<string, unknown>) => request<{voice_id: string; text: string; audio_url: string}>(`/api/v2/voices/${id}/preview`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
+  }),
+  deleteVoice: (id: string) => request(`/api/v2/voices/${id}`, {method: 'DELETE'}),
 }

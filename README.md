@@ -2,6 +2,8 @@
 
 ShadowLearn is a free, local-first English shadowing studio for Apple Silicon Macs. Paste or upload a script, choose a local voice, generate natural speech, and practise alongside waveform playback and phrase-synchronised text.
 
+> **V2 Breeze preview:** the `v2-breeze` branch adds a separate blue Breeze TTS 2 experience with voice design, instant cloning, directed performance, English and Chinese, and open-ended accent directions. V1 remains available through the version switch. See the [V2 Breeze setup guide](docs/V2_BREEZE.md).
+
 All normal inference, history, voice references, previews, and audio files stay on your Mac. ShadowLearn does not require ElevenLabs, OpenAI, Supabase, or another paid/cloud inference API.
 
 ## Features

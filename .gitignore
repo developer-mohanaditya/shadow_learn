@@ -12,9 +12,11 @@ frontend/*.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
 data/
+data-v2/
 *.log
 .env
 .env.*
 !.env.example
+!.env.v2.example
 .idea/
 .vscode/

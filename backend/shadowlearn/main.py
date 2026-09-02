@@ -11,6 +11,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .api import router
+from .breeze_api import router as breeze_router
+from .breeze_jobs import breeze_jobs
 from .config import settings
 from .database import db
 from .jobs import jobs
@@ -27,16 +29,19 @@ def backup_scheduler(stop: threading.Event) -> None:
 async def lifespan(_: FastAPI):
     db.initialize()
     jobs.start()
+    breeze_jobs.start()
     stop = threading.Event()
     scheduler = threading.Thread(target=backup_scheduler, args=(stop,), daemon=True)
     scheduler.start()
     yield
     stop.set()
+    breeze_jobs.stop()
     jobs.stop()
 
 
 app = FastAPI(title="Shadow Learn", version="0.1.0", lifespan=lifespan)
 app.include_router(router)
+app.include_router(breeze_router)
 
 assets = settings.frontend_dist / "assets"
 if assets.is_dir():
@@ -55,7 +60,7 @@ def frontend(path: str):
 
 
 def run() -> None:
-    uvicorn.run("shadowlearn.main:app", host="127.0.0.1", port=8420, reload=False)
+    uvicorn.run("shadowlearn.main:app", host=settings.host, port=settings.port, reload=False)
 
 
 if __name__ == "__main__":

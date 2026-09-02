@@ -1,4 +1,5 @@
 export type Page = 'studio' | 'voices' | 'history' | 'settings'
+export type BreezePage = 'studio' | 'lab' | 'voices' | 'history' | 'settings'
 
 export interface Engine {
   id: string
@@ -51,6 +52,41 @@ export interface Generation {
   audio: { wav?: string; mp3?: string }
 }
 
+export interface BreezeVoice {
+  id: string
+  name: string
+  kind: 'designed' | 'cloned'
+  language: 'en' | 'zh'
+  accent_direction: string
+  description: string
+  reference_text?: string
+  seed: number
+  cfg_scale: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BreezeGeneration extends Generation {
+  mode: 'design' | 'clone' | 'direction'
+  language: 'en' | 'zh'
+  accent_direction: string
+  direction: string
+  model_variant: 'mixed-4bit'
+  generation_seconds?: number
+  real_time_factor?: number
+}
+
+export interface BreezeCapabilities {
+  id: string
+  name: string
+  available: boolean
+  reason?: string
+  modes: string[]
+  languages: {id: 'en' | 'zh'; name: string}[]
+  english_directions: string[]
+  capabilities: Record<string, unknown>
+}
+
 export interface Health {
   database: string
   data_directory: string
@@ -67,4 +103,3 @@ export interface Backup {
   integrity_ok: number | boolean
   created_at: string
 }
-
