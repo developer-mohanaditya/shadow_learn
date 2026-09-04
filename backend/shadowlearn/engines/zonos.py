@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import base64
 import json
+import os
+import signal
+import subprocess
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
-from threading import Event, Lock
+from threading import Event, Lock, RLock
 from typing import Any
 
 from ..config import settings
@@ -24,15 +28,20 @@ class ZonosEngine(SpeechEngine):
     def __init__(self) -> None:
         self._speaker_ids: dict[str, str] = {}
         self._speaker_lock = Lock()
+        self._server_lock = RLock()
+        self._server_process: subprocess.Popen[bytes] | None = None
         self._session_id = "shadow-learn"
 
     def health(self) -> EngineHealth:
-        try:
-            with urllib.request.urlopen(f"{settings.zonos_url}/health", timeout=1) as response:
-                available = response.status < 400
+        running = self._server_healthy()
+        installed = self._launcher_path().is_file()
+        available = running or installed
+        if running:
             reason = None
-        except (OSError, urllib.error.URLError):
-            available, reason = False, f"ZONOS2 server not reachable at {settings.zonos_url}"
+        elif installed:
+            reason = "Starts locally when selected; no model memory is reserved while idle"
+        else:
+            reason = "ZONOS2 is not installed"
         return EngineHealth(
             id=self.id,
             name=self.name,
@@ -40,6 +49,57 @@ class ZonosEngine(SpeechEngine):
             reason=reason,
             capabilities={"voice_cloning": True, "presets": True, "accents": ["us", "uk"]},
         )
+
+    def prepare(self) -> None:
+        with self._server_lock:
+            if self._server_healthy():
+                return
+            launcher = self._launcher_path()
+            if not launcher.is_file():
+                raise RuntimeError("ZONOS2 is not installed")
+            engine_dir = launcher.parent
+            log = (settings.data / "zonos2.log").open("ab")
+            error_log = (settings.data / "zonos2-error.log").open("ab")
+            try:
+                self._server_process = subprocess.Popen(
+                    [
+                        str(launcher), "--quant", "q4_k", "--gpu", "--yes", "--no-browser",
+                        "--", "--dac-gpu",
+                    ],
+                    cwd=engine_dir,
+                    stdout=log,
+                    stderr=error_log,
+                    start_new_session=True,
+                )
+            finally:
+                log.close()
+                error_log.close()
+            deadline = time.monotonic() + 120
+            while time.monotonic() < deadline:
+                if self._server_healthy():
+                    return
+                if self._server_process.poll() is not None:
+                    break
+                time.sleep(0.5)
+            self.release()
+            raise RuntimeError("ZONOS2 did not become ready within two minutes; check data/zonos2-error.log")
+
+    def release(self) -> None:
+        with self._server_lock:
+            process = self._server_process
+            self._server_process = None
+            self._speaker_ids.clear()
+            if not process or process.poll() is not None:
+                return
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.wait(timeout=5)
+
+    def close(self) -> None:
+        self.release()
 
     def synthesize(
         self,
@@ -116,3 +176,15 @@ class ZonosEngine(SpeechEngine):
             if speaker.get("is_default") and speaker.get("label") == label:
                 return str(speaker["id"])
         raise RuntimeError(f"ZONOS2 default voice is unavailable: {label}")
+
+    @staticmethod
+    def _launcher_path() -> Path:
+        return settings.root / ".engines" / "zonos2" / "start-zonos2.sh"
+
+    @staticmethod
+    def _server_healthy() -> bool:
+        try:
+            with urllib.request.urlopen(f"{settings.zonos_url}/health", timeout=1) as response:
+                return response.status < 400
+        except (OSError, urllib.error.URLError):
+            return False

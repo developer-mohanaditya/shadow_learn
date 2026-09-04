@@ -77,7 +77,14 @@ class JobManager:
                     (str(exc), now_iso(), generation_id),
                 )
             finally:
+                self._release_generation_engine(generation_id)
                 self._notify(generation_id)
+
+    @staticmethod
+    def _release_generation_engine(generation_id: str) -> None:
+        generation = db.fetch_one("SELECT engine FROM generations WHERE id=?", (generation_id,))
+        if generation:
+            registry.get(generation["engine"]).release()
 
     def _process(self, generation_id: str) -> None:
         generation = db.fetch_one("SELECT * FROM generations WHERE id=?", (generation_id,))
@@ -85,6 +92,7 @@ class JobManager:
             return
         options = json.loads(generation["settings_json"])
         engine = registry.get(generation["engine"])
+        engine.prepare()
         health = engine.health()
         if not health.available:
             raise RuntimeError(health.reason or f"{health.name} is unavailable")

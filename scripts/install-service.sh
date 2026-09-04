@@ -16,11 +16,8 @@ launchctl bootstrap "gui/$(id -u)" "$plist"
 launchctl enable "gui/$(id -u)/com.shadowlearn.app"
 echo "Installed Shadow Learn service at $plist"
 
-if [[ -x "$project_dir/.engines/zonos2/zonos2-server" ]]; then
-  sed -e "s|__PROJECT_DIR__|$project_dir|g" \
-    "$project_dir/deploy/com.shadowlearn.zonos2.plist.template" > "$zonos_plist"
-  launchctl bootout "gui/$(id -u)/com.shadowlearn.zonos2" 2>/dev/null || true
-  launchctl bootstrap "gui/$(id -u)" "$zonos_plist"
-  launchctl enable "gui/$(id -u)/com.shadowlearn.zonos2"
-  echo "Installed ZONOS2 service at $zonos_plist"
-fi
+# ZONOS2 is intentionally not a launchd service. The app starts its local
+# Metal server only for a ZONOS generation and shuts it down afterwards.
+launchctl bootout "gui/$(id -u)/com.shadowlearn.zonos2" 2>/dev/null || true
+rm -f "$zonos_plist"
+echo "ZONOS2 is configured for on-demand use only"

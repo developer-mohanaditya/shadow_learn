@@ -36,3 +36,10 @@ class SpeechEngine(ABC):
     def close(self) -> None:
         return None
 
+    def prepare(self) -> None:
+        """Prepare an engine immediately before a generation job."""
+        return None
+
+    def release(self) -> None:
+        """Release job-scoped engine resources after a generation job."""
+        return None

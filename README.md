@@ -142,7 +142,7 @@ In another terminal, confirm that the local service responds:
 curl http://127.0.0.1:1919/health
 ```
 
-Stop the temporary server with `Control-C` after the check. The production `launchd` setup in step 9 starts it automatically.
+Stop the temporary server with `Control-C` after the check. ShadowLearn starts ZONOS2 locally only when you select it for a generation and shuts it down when that generation finishes.
 
 ### 7. Build and test ShadowLearn
 
@@ -178,14 +178,13 @@ After the frontend is built and the desired engines are installed:
 ./scripts/install-service.sh
 ```
 
-This installs per-user `launchd` agents for ShadowLearn and, when installed, ZONOS2. Check them with:
+This installs the per-user `launchd` agent for ShadowLearn. ZONOS2 is intentionally not installed as a persistent service; it is started on demand by the app.
 
 ```sh
 launchctl print gui/$(id -u)/com.shadowlearn.app
-launchctl print gui/$(id -u)/com.shadowlearn.zonos2
 ```
 
-Application logs are stored in `data/shadowlearn.log` and `data/shadowlearn-error.log`. ZONOS2 logs are stored in `data/zonos2.log` and `data/zonos2-error.log`.
+Application logs are stored in `data/shadowlearn.log` and `data/shadowlearn-error.log`. On-demand ZONOS2 logs are stored in `data/zonos2.log` and `data/zonos2-error.log`.
 
 ### 10. Optional private remote access
 
